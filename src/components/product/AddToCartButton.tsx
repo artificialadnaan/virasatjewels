@@ -13,9 +13,12 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const isSoldOut = product.stockQuantity === 0;
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   function addToCart() {
-    if (isSoldOut) return;
+    if (isSoldOut || processing) return;
+
+    setProcessing(true);
 
     try {
       const raw = localStorage.getItem("vj_cart");
@@ -48,9 +51,12 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       window.dispatchEvent(new Event("storage"));
 
       setAdded(true);
-      setTimeout(() => setAdded(false), 2000);
+      setTimeout(() => {
+        setAdded(false);
+        setProcessing(false);
+      }, 2000);
     } catch {
-      // silently fail
+      setProcessing(false);
     }
   }
 
@@ -90,7 +96,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       {/* Add to cart button */}
       <button
         onClick={addToCart}
-        disabled={isSoldOut}
+        disabled={isSoldOut || processing}
         className={`flex items-center justify-center gap-2 w-full py-3.5 text-sm font-medium uppercase tracking-widest rounded-sm transition-all duration-300 ${
           isSoldOut
             ? "bg-charcoal/20 text-charcoal-light cursor-not-allowed"

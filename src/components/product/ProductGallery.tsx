@@ -11,6 +11,14 @@ interface ProductGalleryProps {
   productName: string;
 }
 
+function ImagePlaceholder() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-cream">
+      <span className="text-xs italic text-gold">Image Coming Soon</span>
+    </div>
+  );
+}
+
 export default function ProductGallery({
   images,
   productName,
@@ -23,10 +31,10 @@ export default function ProductGallery({
 
   const mainSrc = activeImage?.url
     ? getImageUrl(activeImage.url, "detail")
-    : "/placeholder-jewelry.jpg";
+    : null;
   const zoomSrc = activeImage?.url
     ? getImageUrl(activeImage.url, "zoom")
-    : "/placeholder-jewelry.jpg";
+    : null;
 
   const openLightbox = useCallback(() => setLightboxOpen(true), []);
   const closeLightbox = useCallback(() => setLightboxOpen(false), []);
@@ -37,19 +45,26 @@ export default function ProductGallery({
         {/* Main image */}
         <div
           className="relative aspect-square bg-cream rounded-sm overflow-hidden cursor-zoom-in group"
-          onClick={openLightbox}
+          onClick={mainSrc ? openLightbox : undefined}
         >
-          <Image
-            src={mainSrc}
-            alt={activeImage?.altText ?? productName}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 transition-colors flex items-center justify-center">
-            <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-80 transition-opacity" />
-          </div>
+          {mainSrc ? (
+            <Image
+              src={mainSrc}
+              alt={activeImage?.altText ?? productName}
+              fill
+              priority
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
+          ) : (
+            <ImagePlaceholder />
+          )}
+          {mainSrc && (
+            <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 transition-colors flex items-center justify-center">
+              <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-80 transition-opacity" />
+            </div>
+          )}
         </div>
 
         {/* Thumbnail strip */}
@@ -58,7 +73,7 @@ export default function ProductGallery({
             {sorted.map((img, idx) => {
               const thumbSrc = img.url
                 ? getImageUrl(img.url, "thumbnail")
-                : "/placeholder-jewelry.jpg";
+                : null;
               const isActive = idx === activeIndex;
               return (
                 <button
@@ -71,13 +86,18 @@ export default function ProductGallery({
                   }`}
                   aria-label={`View image ${idx + 1}`}
                 >
-                  <Image
-                    src={thumbSrc}
-                    alt={img.altText ?? `${productName} ${idx + 1}`}
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                  />
+                  {thumbSrc ? (
+                    <Image
+                      src={thumbSrc}
+                      alt={img.altText ?? `${productName} ${idx + 1}`}
+                      fill
+                      unoptimized
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <ImagePlaceholder />
+                  )}
                 </button>
               );
             })}
@@ -86,7 +106,7 @@ export default function ProductGallery({
       </div>
 
       {/* Lightbox */}
-      {lightboxOpen && (
+      {lightboxOpen && zoomSrc && (
         <div
           className="fixed inset-0 z-50 bg-charcoal/90 flex items-center justify-center p-4"
           onClick={closeLightbox}
@@ -107,6 +127,7 @@ export default function ProductGallery({
               src={zoomSrc}
               alt={activeImage?.altText ?? productName}
               fill
+              unoptimized
               sizes="(max-width: 768px) 100vw, 75vw"
               className="object-contain"
             />

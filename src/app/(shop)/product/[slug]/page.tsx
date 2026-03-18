@@ -166,7 +166,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-4">
               {isSoldOut ? (
                 <span className="px-3 py-1 bg-charcoal text-cream text-xs uppercase tracking-widest rounded-sm">
                   Sold Out
@@ -190,7 +190,7 @@ export default async function ProductPage({ params }: Props) {
             <AddToCartButton product={typedProduct} />
 
             {/* Trust signals */}
-            <div className="mt-6 space-y-2.5 py-4 border-t border-b border-gold/20">
+            <div className="mt-5 space-y-2 py-3 border-t border-b border-gold/20">
               <p className="text-xs text-charcoal-light flex items-center gap-2">
                 <span className="text-gold">&#x2708;</span>
                 Free Shipping on orders over $50
@@ -209,7 +209,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="h-px bg-gold/20 my-6" />
 
             {/* Description */}
-            {product.description && (
+            {product.description && product.description.length > 50 && (
               <div>
                 <h2 className="font-serif text-lg text-charcoal mb-3">
                   About This Piece

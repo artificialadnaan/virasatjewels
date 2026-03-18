@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [newArrivals, collections, heroProduct] = await Promise.all([
+  const [newArrivals, collections, heroProduct, craftProduct] = await Promise.all([
     // New arrivals: 6 products that have at least one image
     prisma.product.findMany({
       where: {
@@ -47,9 +47,19 @@ export default async function HomePage() {
       orderBy: { price: "desc" },
       include: { images: { orderBy: { position: "asc" }, take: 1 } },
     }),
+    // Craft: a Kundan product for the heritage section
+    prisma.product.findFirst({
+      where: {
+        isActive: true,
+        images: { some: {} },
+        material: { contains: "Kundan", mode: "insensitive" },
+      },
+      include: { images: { orderBy: { position: "asc" }, take: 1 } },
+    }),
   ]);
 
   const heroImageUrl = heroProduct?.images[0]?.url ?? null;
+  const craftImageUrl = craftProduct?.images[0]?.url ?? null;
 
   // Static fallback collection cards when DB has fewer than 3
   const collectionCards = [
@@ -379,67 +389,59 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right: decorative panel */}
+            {/* Right: craft image or decorative fallback */}
             <div className="relative">
-              <div className="aspect-square max-w-sm mx-auto lg:max-w-none">
-                <div className="relative w-full h-full min-h-[360px]">
-                  {/* Outer frame */}
-                  <div className="absolute inset-0 border-2 border-gold/30 rounded-sm" />
-                  {/* Inner frame offset */}
-                  <div className="absolute inset-4 border border-gold/20 rounded-sm" />
-                  {/* Centered content */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-burgundy/5">
-                    {/* Ornamental diamond */}
-                    <div className="w-16 h-16 border-2 border-gold/50 rotate-45 mb-6 flex items-center justify-center">
-                      <div className="w-6 h-6 bg-gold/30" />
-                    </div>
-                    <p className="font-serif text-burgundy text-lg text-center leading-relaxed">
-                      &ldquo;Every piece a poem,
-                      <br />
-                      every jewel a memory.&rdquo;
+              {craftImageUrl ? (
+                <div className="relative aspect-square max-w-sm mx-auto lg:max-w-none overflow-hidden rounded-sm">
+                  <Image
+                    src={craftImageUrl}
+                    alt="Heritage kundan jewelry craftsmanship"
+                    fill
+                    sizes="(max-width: 1024px) 90vw, 50vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <p className="font-serif text-cream text-lg text-center leading-relaxed">
+                      &ldquo;Every piece a poem,<br />every jewel a memory.&rdquo;
                     </p>
-                    <div className="mt-6 flex gap-2">
+                    <div className="mt-3 flex gap-2 justify-center">
                       <div className="h-px w-8 bg-gold/40 self-center" />
-                      <span className="text-gold text-xs uppercase tracking-widest">
-                        Virasat
-                      </span>
+                      <span className="text-gold text-xs uppercase tracking-widest">Virasat</span>
                       <div className="h-px w-8 bg-gold/40 self-center" />
                     </div>
-                    {/* Corner ornaments */}
-                    <div className="absolute top-6 left-6 w-4 h-4 border-t-2 border-l-2 border-gold/40" />
-                    <div className="absolute top-6 right-6 w-4 h-4 border-t-2 border-r-2 border-gold/40" />
-                    <div className="absolute bottom-6 left-6 w-4 h-4 border-b-2 border-l-2 border-gold/40" />
-                    <div className="absolute bottom-6 right-6 w-4 h-4 border-b-2 border-r-2 border-gold/40" />
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="aspect-square max-w-sm mx-auto lg:max-w-none">
+                  <div className="relative w-full h-full min-h-[360px]">
+                    <div className="absolute inset-0 border-2 border-gold/30 rounded-sm" />
+                    <div className="absolute inset-4 border border-gold/20 rounded-sm" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-burgundy/5">
+                      <div className="w-16 h-16 border-2 border-gold/50 rotate-45 mb-6 flex items-center justify-center">
+                        <div className="w-6 h-6 bg-gold/30" />
+                      </div>
+                      <p className="font-serif text-burgundy text-lg text-center leading-relaxed">
+                        &ldquo;Every piece a poem,<br />every jewel a memory.&rdquo;
+                      </p>
+                      <div className="mt-6 flex gap-2">
+                        <div className="h-px w-8 bg-gold/40 self-center" />
+                        <span className="text-gold text-xs uppercase tracking-widest">Virasat</span>
+                        <div className="h-px w-8 bg-gold/40 self-center" />
+                      </div>
+                      <div className="absolute top-6 left-6 w-4 h-4 border-t-2 border-l-2 border-gold/40" />
+                      <div className="absolute top-6 right-6 w-4 h-4 border-t-2 border-r-2 border-gold/40" />
+                      <div className="absolute bottom-6 left-6 w-4 h-4 border-b-2 border-l-2 border-gold/40" />
+                      <div className="absolute bottom-6 right-6 w-4 h-4 border-b-2 border-r-2 border-gold/40" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Craft Highlights ─── */}
-      <section className="bg-burgundy py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            {[
-              { number: "900+", label: "Handcrafted Pieces" },
-              { number: "4", label: "Master Artisan Families" },
-              { number: "100%", label: "Ethically Sourced" },
-              { number: "∞", label: "Generations of Heritage" },
-            ].map((stat) => (
-              <div key={stat.label} className="py-4">
-                <p className="font-serif text-3xl sm:text-4xl text-gold mb-2">
-                  {stat.number}
-                </p>
-                <p className="text-cream/70 text-xs uppercase tracking-widest">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

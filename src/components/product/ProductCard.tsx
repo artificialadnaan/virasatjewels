@@ -30,8 +30,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         {imageSrc ? (
           <Image
             src={imageSrc}
-            alt={altText}
+            alt={altText.length > 80 ? altText.slice(0, 80) + "…" : altText}
             fill
+            unoptimized
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />

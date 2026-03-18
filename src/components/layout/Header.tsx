@@ -41,7 +41,7 @@ export default function Header({ categories = [] }: HeaderProps) {
   }, []);
 
   const navLinks = [
-    { label: "Collections", href: "/products" },
+    { label: "Shop", href: "/products" },
     { label: "About", href: "/about" },
   ];
 
