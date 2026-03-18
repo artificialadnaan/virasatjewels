@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
-import { checkoutRateLimit, rateLimit } from "@/lib/rate-limit";
+import { getCheckoutRateLimit, rateLimit } from "@/lib/rate-limit";
 
 interface CreateSessionItem {
   productId: string;
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-real-ip") ??
     "unknown";
 
-  const { success } = await rateLimit(checkoutRateLimit, ip);
+  const { success } = await rateLimit(getCheckoutRateLimit(), ip);
   if (!success) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment and try again." },
