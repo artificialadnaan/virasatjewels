@@ -9,7 +9,6 @@ export function getResend(): Resend {
   return _resend;
 }
 
-// Convenience named export for files that import `resend` directly
 export const resend = new Proxy({} as Resend, {
   get(_target, prop) {
     return (getResend() as unknown as Record<string | symbol, unknown>)[prop];
