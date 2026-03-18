@@ -9,9 +9,7 @@
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient({
-  datasourceUrl:
-    process.env.DATABASE_URL ||
-    "postgresql://postgres:CkgAJcpEHQuLpogkxrdpMJxUAraUnpup@mainline.proxy.rlwy.net:15736/railway",
+  datasourceUrl: process.env.DATABASE_URL,
 });
 
 const MINOR_WORDS = new Set([
