@@ -338,7 +338,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {[
-              { number: "200+", label: "Handcrafted Pieces" },
+              { number: "900+", label: "Handcrafted Pieces" },
               { number: "4", label: "Master Artisan Families" },
               { number: "100%", label: "Ethically Sourced" },
               { number: "∞", label: "Generations of Heritage" },

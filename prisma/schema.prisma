@@ -89,6 +89,8 @@ model Product {
   @@index([categoryId])
   @@index([collectionId])
   @@index([isActive])
+  @@index([price])
+  @@index([name])
 }
 
 model ProductImage {
