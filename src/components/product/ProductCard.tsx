@@ -12,7 +12,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const primaryImage = product.images.sort((a, b) => a.position - b.position)[0];
   const imageSrc = primaryImage?.url
     ? getImageUrl(primaryImage.url, "thumbnail")
-    : "/placeholder-jewelry.jpg";
+    : null;
   const altText = primaryImage?.altText ?? product.name;
 
   const isSoldOut = product.stockQuantity === 0;
@@ -27,13 +27,19 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       {/* Image container */}
       <div className="relative aspect-square overflow-hidden bg-cream">
-        <Image
-          src={imageSrc}
-          alt={altText}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={altText}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-cream">
+            <span className="text-xs italic text-gold">Image Coming Soon</span>
+          </div>
+        )}
 
         {/* Sold out overlay */}
         {isSoldOut && (

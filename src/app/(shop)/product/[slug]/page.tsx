@@ -189,6 +189,22 @@ export default async function ProductPage({ params }: Props) {
             {/* Add to cart */}
             <AddToCartButton product={typedProduct} />
 
+            {/* Trust signals */}
+            <div className="mt-6 space-y-2.5 py-4 border-t border-b border-gold/20">
+              <p className="text-xs text-charcoal-light flex items-center gap-2">
+                <span className="text-gold">&#x2708;</span>
+                Free Shipping on orders over $50
+              </p>
+              <p className="text-xs text-charcoal-light flex items-center gap-2">
+                <span className="text-gold">&#x2713;</span>
+                Secure Checkout
+              </p>
+              <p className="text-xs text-charcoal-light flex items-center gap-2">
+                <span className="text-gold">&#x2713;</span>
+                Easy Returns within 14 days
+              </p>
+            </div>
+
             {/* Divider */}
             <div className="h-px bg-gold/20 my-6" />
 

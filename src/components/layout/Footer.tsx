@@ -10,7 +10,7 @@ export default function Footer({ categories = [] }: FooterProps) {
     { label: "About", href: "/about" },
     { label: "Shipping", href: "/shipping" },
     { label: "Returns", href: "/returns" },
-    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
     { label: "Terms", href: "/terms" },
   ];
 
@@ -31,6 +31,12 @@ export default function Footer({ categories = [] }: FooterProps) {
               Preserving centuries of South Asian craftsmanship — one piece at a
               time. Heritage jewelry for modern souls.
             </p>
+            <a
+              href="mailto:contact@virasatjewels.com"
+              className="text-sm text-burgundy hover:text-burgundy-dark transition-colors mt-3 inline-block"
+            >
+              contact@virasatjewels.com
+            </a>
           </div>
 
           {/* Quick links */}

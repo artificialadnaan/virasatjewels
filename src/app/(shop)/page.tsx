@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import ProductGrid from "@/components/product/ProductGrid";
-import NewsletterSection from "@/components/home/NewsletterSection";
 import type { ProductWithImages } from "@/types";
 
 export const metadata: Metadata = {
@@ -12,18 +12,44 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [newArrivals, collections] = await Promise.all([
+  const [newArrivals, collections, heroProduct] = await Promise.all([
+    // New arrivals: 6 products that have at least one image
     prisma.product.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        images: { some: {} },
+      },
       orderBy: { createdAt: "desc" },
-      take: 8,
+      take: 6,
       include: { images: true, category: true, collection: true },
     }),
+    // Collections with the first product image from each
     prisma.collection.findMany({
       orderBy: { name: "asc" },
       take: 3,
+      include: {
+        products: {
+          where: {
+            isActive: true,
+            images: { some: {} },
+          },
+          take: 1,
+          include: { images: { orderBy: { position: "asc" }, take: 1 } },
+        },
+      },
+    }),
+    // Hero: most expensive active product with images
+    prisma.product.findFirst({
+      where: {
+        isActive: true,
+        images: { some: {} },
+      },
+      orderBy: { price: "desc" },
+      include: { images: { orderBy: { position: "asc" }, take: 1 } },
     }),
   ]);
+
+  const heroImageUrl = heroProduct?.images[0]?.url ?? null;
 
   // Static fallback collection cards when DB has fewer than 3
   const collectionCards = [
@@ -34,6 +60,7 @@ export default async function HomePage() {
         "Exquisite pieces crafted for the most cherished occasions — adorned with kundan and polki.",
       href: "/products?collection=bridal",
       gradient: "from-burgundy to-burgundy-dark",
+      imageUrl: null as string | null,
     },
     {
       id: "everyday",
@@ -42,6 +69,7 @@ export default async function HomePage() {
         "Refined gold and silver pieces for the woman who carries heritage in every moment.",
       href: "/products?collection=everyday",
       gradient: "from-charcoal to-[#1a1a1a]",
+      imageUrl: null as string | null,
     },
     {
       id: "heritage",
@@ -50,6 +78,7 @@ export default async function HomePage() {
         "Timeless designs passed down through generations — now available to discerning collectors.",
       href: "/products",
       gradient: "from-[#4a3520] to-[#2a1f10]",
+      imageUrl: null as string | null,
     },
   ];
 
@@ -63,6 +92,7 @@ export default async function HomePage() {
             "Curated heritage pieces for the discerning collector.",
           href: `/collection/${col.slug}`,
           gradient: collectionCards[i % collectionCards.length].gradient,
+          imageUrl: col.products[0]?.images[0]?.url ?? null,
         }))
       : collectionCards;
 
@@ -79,54 +109,92 @@ export default async function HomePage() {
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28 sm:py-36 lg:py-44 text-center">
-          {/* Decorative top ornament */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="h-px w-12 bg-gold/50" />
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              className="text-gold opacity-70"
-            >
-              <path
-                d="M10 2L12.09 7.26L17.5 7.27L13.25 10.74L14.75 16L10 13L5.25 16L6.75 10.74L2.5 7.27L7.91 7.26L10 2Z"
-                fill="currentColor"
-              />
-            </svg>
-            <div className="h-px w-12 bg-gold/50" />
-          </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: text */}
+            <div className="text-center lg:text-left">
+              {/* Decorative top ornament */}
+              <div className="flex items-center justify-center lg:justify-start gap-3 mb-8">
+                <div className="h-px w-12 bg-gold/50" />
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  className="text-gold opacity-70"
+                >
+                  <path
+                    d="M10 2L12.09 7.26L17.5 7.27L13.25 10.74L14.75 16L10 13L5.25 16L6.75 10.74L2.5 7.27L7.91 7.26L10 2Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <div className="h-px w-12 bg-gold/50" />
+              </div>
 
-          <p className="text-gold text-xs uppercase tracking-[0.3em] mb-4">
-            Est. with Tradition
-          </p>
+              <p className="text-gold text-xs uppercase tracking-[0.3em] mb-4">
+                Est. with Tradition
+              </p>
 
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-cream leading-tight mb-6 max-w-4xl mx-auto">
-            Heritage Crafted,
-            <br />
-            <span className="text-gold">Timeless Beauty</span>
-          </h1>
+              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-cream leading-tight mb-6">
+                Heritage Crafted,
+                <br />
+                <span className="text-gold">Timeless Beauty</span>
+              </h1>
 
-          <p className="text-cream/70 text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
-            Discover exquisite South Asian jewelry handcrafted with
-            centuries-old traditions — where every piece tells a story of
-            artistry and devotion.
-          </p>
+              <p className="text-cream/70 text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-10">
+                Discover exquisite South Asian jewelry handcrafted with
+                centuries-old traditions — where every piece tells a story of
+                artistry and devotion.
+              </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/products"
-              className="inline-block px-10 py-4 bg-gold text-charcoal text-sm font-medium uppercase tracking-widest rounded-sm hover:bg-gold-light transition-colors duration-300"
-            >
-              Explore Collection
-            </Link>
-            <Link
-              href="/about"
-              className="inline-block px-10 py-4 border border-gold/50 text-gold text-sm font-medium uppercase tracking-widest rounded-sm hover:border-gold hover:bg-gold/10 transition-colors duration-300"
-            >
-              Our Story
-            </Link>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link
+                  href="/products"
+                  className="inline-block px-10 py-4 bg-gold text-charcoal text-sm font-medium uppercase tracking-widest rounded-sm hover:bg-gold-light transition-colors duration-300"
+                >
+                  Explore Collection
+                </Link>
+                <Link
+                  href="/about"
+                  className="inline-block px-10 py-4 border border-gold/50 text-gold text-sm font-medium uppercase tracking-widest rounded-sm hover:border-gold hover:bg-gold/10 transition-colors duration-300"
+                >
+                  Our Story
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: featured product image */}
+            {heroImageUrl && (
+              <div className="relative flex justify-center lg:justify-end">
+                <div className="relative w-full max-w-md lg:max-w-lg">
+                  {/* Decorative border frame */}
+                  <div className="absolute -inset-3 border border-gold/30 rounded-sm" />
+                  <div className="absolute -inset-1 border border-gold/10 rounded-sm" />
+                  {/* Image */}
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-sm">
+                    <Image
+                      src={heroImageUrl}
+                      alt={heroProduct?.name ?? "Featured heritage jewelry piece"}
+                      fill
+                      sizes="(max-width: 1024px) 90vw, 40vw"
+                      className="object-cover"
+                      priority
+                    />
+                    {/* Subtle gradient overlay at bottom */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-burgundy/40 via-transparent to-transparent" />
+                    {/* Product name label */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-gold text-xs uppercase tracking-widest mb-1">
+                        Featured Piece
+                      </p>
+                      <p className="font-serif text-cream text-lg leading-snug">
+                        {heroProduct?.name}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Bottom gold divider */}
@@ -160,19 +228,36 @@ export default async function HomePage() {
                 href={col.href}
                 className="group relative overflow-hidden rounded-sm aspect-[4/5] flex flex-col justify-end hover:shadow-2xl transition-shadow duration-500"
               >
-                {/* Gradient background */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-b ${col.gradient}`}
-                />
+                {/* Product image background or gradient fallback */}
+                {col.imageUrl ? (
+                  <>
+                    <Image
+                      src={col.imageUrl}
+                      alt={col.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    {/* Dark gradient overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+                  </>
+                ) : (
+                  <>
+                    {/* Gradient fallback when no image available */}
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-b ${col.gradient}`}
+                    />
+                    {/* Decorative pattern overlay */}
+                    <div
+                      className="absolute inset-0 opacity-10"
+                      style={{
+                        backgroundImage: `radial-gradient(circle at 70% 30%, #C9A84C, transparent 60%)`,
+                      }}
+                    />
+                  </>
+                )}
                 {/* Gold border on hover */}
                 <div className="absolute inset-0 border-2 border-transparent group-hover:border-gold/60 transition-colors duration-500 rounded-sm" />
-                {/* Decorative pattern overlay */}
-                <div
-                  className="absolute inset-0 opacity-10"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 70% 30%, #C9A84C, transparent 60%)`,
-                  }}
-                />
                 {/* Content */}
                 <div className="relative z-10 p-6">
                   <h3 className="font-serif text-cream text-xl mb-2">
@@ -250,7 +335,7 @@ export default async function HomePage() {
               <div className="space-y-4 text-charcoal-light leading-relaxed text-sm sm:text-base">
                 <p>
                   Virasat — meaning{" "}
-                  <em className="text-charcoal">"heritage"</em> in Urdu — was
+                  <em className="text-charcoal">&quot;heritage&quot;</em> in Urdu — was
                   born from a profound reverence for the jewellery traditions
                   of South Asia. For centuries, master artisans in the
                   workshops of Jaipur, Hyderabad, and Lahore have perfected
@@ -355,9 +440,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ─── Newsletter ─── */}
-      <NewsletterSection />
     </div>
   );
 }
