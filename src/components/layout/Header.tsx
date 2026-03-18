@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, ShoppingBag, ChevronDown } from "lucide-react";
+import { useCartStore } from "@/stores/cart-store";
 import type { Category } from "@prisma/client";
 
 interface HeaderProps {
@@ -12,24 +13,12 @@ interface HeaderProps {
 export default function Header({ categories = [] }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const cartCount = useCartStore((s) => s.getItemCount());
 
   useEffect(() => {
-    function readCart() {
-      try {
-        const raw = localStorage.getItem("vj_cart");
-        if (!raw) return setCartCount(0);
-        const cart = JSON.parse(raw);
-        const items: { quantity: number }[] = cart?.items ?? [];
-        setCartCount(items.reduce((sum, i) => sum + (i.quantity ?? 0), 0));
-      } catch {
-        setCartCount(0);
-      }
-    }
-    readCart();
-    window.addEventListener("storage", readCart);
-    return () => window.removeEventListener("storage", readCart);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -126,10 +115,10 @@ export default function Header({ categories = [] }: HeaderProps) {
           <Link
             href="/cart"
             className="relative flex items-center gap-2 text-cream/90 hover:text-gold transition-colors"
-            aria-label={`Cart, ${cartCount} items`}
+            aria-label={`Cart, ${mounted ? cartCount : 0} items`}
           >
             <ShoppingBag className="w-5 h-5" />
-            {cartCount > 0 && (
+            {mounted && cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-gold text-charcoal text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
@@ -152,10 +141,10 @@ export default function Header({ categories = [] }: HeaderProps) {
             <Link
               href="/cart"
               className="relative text-charcoal"
-              aria-label={`Cart, ${cartCount} items`}
+              aria-label={`Cart, ${mounted ? cartCount : 0} items`}
             >
               <ShoppingBag className="w-5 h-5" />
-              {cartCount > 0 && (
+              {mounted && cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-gold text-charcoal text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { ShoppingBag } from "lucide-react";
+import { useCartStore } from "@/stores/cart-store";
 import type { ProductWithImages } from "@/types";
-import type { CartState } from "@/types";
 
 interface AddToCartButtonProps {
   product: ProductWithImages;
@@ -14,6 +14,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const addItem = useCartStore((s) => s.addItem);
 
   function addToCart() {
     if (isSoldOut || processing) return;
@@ -21,34 +22,18 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     setProcessing(true);
 
     try {
-      const raw = localStorage.getItem("vj_cart");
-      const cart: CartState = raw
-        ? JSON.parse(raw)
-        : { items: [], lastValidated: new Date().toISOString() };
-
       const primaryImage = product.images.sort(
         (a, b) => a.position - b.position
       )[0];
 
-      const existing = cart.items.find((i) => i.productId === product.id);
-      if (existing) {
-        existing.quantity = Math.min(
-          existing.quantity + quantity,
-          product.stockQuantity
-        );
-      } else {
-        cart.items.push({
-          productId: product.id,
-          name: product.name,
-          price: Number(product.price),
-          image: primaryImage?.url ?? "",
-          quantity,
-          maxQuantity: product.stockQuantity,
-        });
-      }
-
-      localStorage.setItem("vj_cart", JSON.stringify(cart));
-      window.dispatchEvent(new Event("storage"));
+      addItem({
+        productId: product.id,
+        name: product.name,
+        price: Number(product.price),
+        image: primaryImage?.url ?? "",
+        quantity,
+        maxQuantity: product.stockQuantity,
+      });
 
       setAdded(true);
       setTimeout(() => {
