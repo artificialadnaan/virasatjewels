@@ -43,7 +43,8 @@ interface PageProps {
 
 export default async function AdminOrdersPage({ searchParams }: PageProps) {
   const session = await auth();
-  if (!session) redirect("/admin/login");
+  const role = (session?.user as { role?: string })?.role;
+  if (!session || role !== "ADMIN") redirect("/admin/login");
 
   const params = await searchParams;
   const search = params.search ?? "";

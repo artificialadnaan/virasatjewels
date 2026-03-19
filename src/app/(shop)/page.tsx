@@ -17,11 +17,11 @@ export default async function HomePage() {
     prisma.product.findMany({
       where: {
         isActive: true,
-        images: { some: {} },
+        images: { some: { url: { not: "" } } },
       },
       orderBy: { createdAt: "desc" },
       take: 6,
-      include: { images: true, category: true, collection: true },
+      include: { images: { orderBy: { position: "asc" } }, category: true, collection: true },
     }),
     // Collections with the first product image from each
     prisma.collection.findMany({
@@ -189,6 +189,7 @@ export default async function HomePage() {
                       sizes="(max-width: 1024px) 90vw, 40vw"
                       className="object-cover"
                       priority
+                      unoptimized
                     />
                     {/* Subtle gradient overlay at bottom */}
                     <div className="absolute inset-0 bg-gradient-to-t from-burgundy/40 via-transparent to-transparent" />
@@ -247,6 +248,7 @@ export default async function HomePage() {
                       fill
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      unoptimized
                     />
                     {/* Dark gradient overlay for text readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
@@ -399,6 +401,7 @@ export default async function HomePage() {
                     fill
                     sizes="(max-width: 1024px) 90vw, 50vw"
                     className="object-cover"
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-transparent to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6">

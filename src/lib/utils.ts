@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import clsx, { type ClassValue } from "clsx";
 
 export function cn(...inputs: ClassValue[]) {
@@ -15,9 +16,7 @@ export function formatPrice(price: number | string): string {
 export function generateOrderNumber(): string {
   const date = new Date();
   const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
-  const random = Math.floor(Math.random() * 9999)
-    .toString()
-    .padStart(4, "0");
+  const random = randomBytes(4).toString("hex");
   return `VJ-${dateStr}-${random}`;
 }
 

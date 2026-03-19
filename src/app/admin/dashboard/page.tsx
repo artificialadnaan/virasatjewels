@@ -5,7 +5,8 @@ import Link from "next/link";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
-  if (!session) redirect("/admin/login");
+  const role = (session?.user as { role?: string })?.role;
+  if (!session || role !== "ADMIN") redirect("/admin/login");
 
   const [productCount, orderCount, lowStockCount] = await Promise.all([
     prisma.product.count({ where: { isActive: true } }),
